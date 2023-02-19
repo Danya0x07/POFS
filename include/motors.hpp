@@ -5,10 +5,10 @@
 
 void motorsInit();
 
-void flapSet(bool open);
-bool flapGet();
+void flapSet(FlapStatus status);
+FlapStatus flapGet();
 
-void filterSet(FilterState filterState);
+void filterSet(FilterState state);
 FilterState filterGet();
 
 #endif // _MOTORS_HPP

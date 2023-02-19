@@ -10,11 +10,12 @@ enum class CommandType {
     LOADING_MODE,
     SAVE_PROGRAM,
     EXECUTE_PROGRAM,
-    RESET
+    RESET,
+    ERROR
 };
 
 enum class FlapStatus {
-    CLOSE, OPEN
+    CLOSED, OPENED
 };
 
 enum class FilterState {
@@ -33,7 +34,7 @@ struct Command {
     union {
         FlapStatus flapStatus;
         FilterState filterState;
-        uint16_t waitTime;
+        uint32_t waitTime;
         LoopData loop;
     };
 };

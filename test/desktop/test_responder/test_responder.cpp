@@ -6,7 +6,7 @@ char buffer[8];
 void Test_ReplyCorrectString()
 {
     reply(buffer, Response::PARSING_OK);
-    TEST_ASSERT_EQUAL_STRING("O\n", buffer);
+    TEST_ASSERT_EQUAL_STRING("0\n", buffer);
 
     reply(buffer, Response::PARSING_ERR);
     TEST_ASSERT_EQUAL_STRING("1\n", buffer);

@@ -3,16 +3,16 @@
 
 void Test_InitialState()
 {
-    TEST_ASSERT_FALSE(flapGet());
+    TEST_ASSERT_EQUAL(FlapStatus::CLOSED, flapGet());
     TEST_ASSERT_EQUAL(FilterState::FS0, filterGet());
 }
 
 void Test_FlapSet()
 {
-    flapSet(1);
-    TEST_ASSERT_TRUE(flapGet());
-    flapSet(0);
-    TEST_ASSERT_FALSE(flapGet());
+    flapSet(FlapStatus::OPENED);
+    TEST_ASSERT_EQUAL(FlapStatus::OPENED, flapGet());
+    flapSet(FlapStatus::CLOSED);
+    TEST_ASSERT_EQUAL(FlapStatus::CLOSED, flapGet());
 }
 
 void Test_FilterSelect()

@@ -10,7 +10,7 @@ void Test_IncorectCommands()
         "A B",
         "G2", "G-1",
         "F7", "F-7",
-        "W 2000",
+        "W 2000 ",
         "L5", "L -6",
         "P6,2,3", "P2,3", "P3", "P", "P2,6,3,4", "PZ",
         "E5", "E -6",
@@ -21,7 +21,7 @@ void Test_IncorectCommands()
 
     for (const char *rawString: rawStrings) {
         status = parse(rawString, cmd);
-        TEST_ASSERT_EQUAL(ParsingStatus::ERROR, status);
+        TEST_ASSERT_EQUAL_MESSAGE(ParsingStatus::ERROR, status, rawString);
     }
 }
 
@@ -33,12 +33,12 @@ void Test_CorrectCommands()
     status = parse("G0", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::SET_FLAP, cmd.type);
-    TEST_ASSERT_EQUAL(FlapStatus::CLOSE, cmd.flapStatus);
+    TEST_ASSERT_EQUAL(FlapStatus::CLOSED, cmd.flapStatus);
 
     status = parse("G1", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::SET_FLAP, cmd.type);
-    TEST_ASSERT_EQUAL(FlapStatus::OPEN, cmd.flapStatus);
+    TEST_ASSERT_EQUAL(FlapStatus::OPENED, cmd.flapStatus);
 
     status = parse("F0", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
