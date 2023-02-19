@@ -1,5 +1,9 @@
 #include "motors.hpp"
 
+void motorsInit()
+{
+}
+
 void flapSet(bool open)
 {
 }

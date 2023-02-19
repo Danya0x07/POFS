@@ -3,6 +3,8 @@
 
 #include "commands.hpp"
 
+void motorsInit();
+
 void flapSet(bool open);
 bool flapGet();
 
