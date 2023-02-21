@@ -83,7 +83,7 @@ ParsingStatus parse(const char *input, Command &cmd)
     case CommandType::WAIT:
         cmd.waitTime = atol(input + 1);
         if (cmd.waitTime > 3600000L || 
-            input[strlen(input) - 1] - '0' != cmd.waitTime % 10)
+            uint32_t(input[strlen(input) - 1] - '0') != cmd.waitTime % 10)
             return ParsingStatus::ERROR;
         break;
 
