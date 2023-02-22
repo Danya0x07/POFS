@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Daniel Efimenko
+/* Copyright (C) 2023 Daniel Efimenko
  *      github.com/Danya0x07
  */
 
