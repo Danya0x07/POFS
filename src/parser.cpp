@@ -113,6 +113,9 @@ ParsingStatus parse(const char *input, Command &cmd)
 
         if (nextParameter(marker, &tmp))
             return ParsingStatus::ERROR;
+        
+        if (cmd.loop.beginMark == 0 || cmd.loop.endMark == 0 || cmd.loop.numRepetitions == 0)
+            cmd.loop = {0};
         break;
 
     case CommandType::EXECUTE_PROGRAM:

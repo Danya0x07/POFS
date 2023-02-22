@@ -5,6 +5,7 @@
 #   include <Servo.h>
 #else
 #   include <stdio.h>
+#   define pinMode(pin, mode) 
 
 class Servo
 {
@@ -46,6 +47,12 @@ FilterState filterState;
 
 void motorsInit()
 {
+    pinMode(PIN_S0, OUTPUT);
+    pinMode(PIN_S1, OUTPUT);
+    pinMode(PIN_S2, OUTPUT);
+    pinMode(PIN_S3, OUTPUT);
+    pinMode(PIN_S4, OUTPUT);
+
     if (!s0.attached())
         s0.attach(PIN_S0);
     if (!s1.attached())

@@ -9,9 +9,11 @@ Executor::Executor(Timer &timer)
 
 void Executor::startExecuting(const Command &cmd, uint32_t now)
 {
+    if (isExecuting())
+        stopExecuting();
+    
     executing_ = true;
     if (cmd.type == CommandType::WAIT) {
-        timer_.stop();
         timer_.setInterval(cmd.waitTime);
         timer_.start(now);
     }

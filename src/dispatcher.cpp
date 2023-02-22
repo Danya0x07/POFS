@@ -60,6 +60,7 @@ CommandDispatcher::Status CommandDispatcher::dispatchRealTime(const Command &com
     case CommandType::RESET:
         memory_.reset();
         runner_.reset();
+        runner_.setUrgentCommand(command);
         break;
     
     case CommandType::SAVE_PROGRAM:
@@ -103,6 +104,7 @@ CommandDispatcher::Status CommandDispatcher::dispatchRecording(const Command &co
     case CommandType::RESET:
         memory_.reset();
         state_ = REALTIME;
+        runner_.setUrgentCommand(command);
         break;
     }
     return status;

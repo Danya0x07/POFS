@@ -1,20 +1,33 @@
+/* Copyright (C) 2022 Daniel Efimenko
+ *      github.com/Danya0x07
+ */
+
 #include <Arduino.h>
-#include <Servo.h>
+#include <ESP8266WiFi.h>
 #include <Button.h>
-#include <pinconfig.hpp>
+#include "dispatcher.hpp"
+#include "motors.hpp"
+#include "parser.hpp"
+#include "responder.hpp"
+#include "executor.hpp"
+#include "pinconfig.hpp"
 
-static char inputBuffer[32];
-static Button button(PIN_BTN, HIGH);
-
-Servo ser0, ser1, ser2, ser3, ser4;
-#define BTN_PIN D1
+char inputBuffer[64];
+char outputBuffer[4];
+Command commandBuffer[100];
+ProgramMemory programMemory(commandBuffer, sizeof(commandBuffer) / sizeof(Command));
+ProgramRunner programRunner(commandBuffer);
+CommandDispatcher commandDispatcher(programMemory, programRunner);
+Timer waitTimer;
+Executor executor(waitTimer);
+Button button(PIN_BTN, HIGH);
 
 /**
  * Асинхронный приём данных по последовательному порту.
  * Читаем из буфера Serial только тогда, когда данные перестали приходить
  * или их накопилось слишком много.
  */
-bool handleSerialInput()
+bool haveSerialInput()
 {
     static uint32_t lastInputTime;
     static uint8_t incomingBytesAmountPrev;
@@ -43,38 +56,69 @@ void handleButton()
     Button::Event event = button.getLastEvent();
 
     if (event == Button::PRESS) {
-        
+        CommandDispatcher::State dispatcherState = commandDispatcher.getState();
+        Command command;
+
+        if (dispatcherState == CommandDispatcher::REALTIME) {
+            command.type = CommandType::SET_FLAP;
+            command.flapStatus = flapGet() == FlapStatus::CLOSED ? FlapStatus::OPENED : FlapStatus::CLOSED;
+            commandDispatcher.dispatch(command);
+        } else if (dispatcherState == CommandDispatcher::EXECUTING) {
+            command.type = CommandType::RESET;
+            commandDispatcher.dispatch(command);
+        }
     }
 }
 
-void setup() {
-  Serial.begin(9600);
-  pinMode(D0, OUTPUT);
-  pinMode(D4, OUTPUT);
-  pinMode(BTN_PIN, INPUT);
-  ser0.attach(D7);
-  ser1.attach(D6);
-  ser2.attach(D5);
-  ser3.attach(D3);
-  ser4.attach(D2);
+void processInput()
+{
+    Command command;
+    ParsingStatus status = parse(inputBuffer, command);
+
+    if (status == ParsingStatus::OK) {
+        reply(outputBuffer, Response::PARSING_OK);
+        Serial.print(outputBuffer);
+        
+        CommandDispatcher::Status dispatchStatus = commandDispatcher.dispatch(command);
+        if (dispatchStatus != CommandDispatcher::OK) {
+            reply(outputBuffer, Response::DISPATCH_ERR);
+            Serial.print(outputBuffer);
+        }
+    } else {
+        reply(outputBuffer, Response::PARSING_ERR);
+        Serial.print(outputBuffer);
+    }
 }
 
-void loop() {
-  digitalWrite(D0, 1);
-  digitalWrite(D4, 0);
-  ser0.write(0);
-  ser1.write(180);
-  ser2.write(0);
-  ser3.write(180);
-  ser4.write(0);
-  delay(1000);
-  digitalWrite(D0, 0);
-  digitalWrite(D4, 1);
-  ser0.write(180);
-  ser1.write(0);
-  ser2.write(180);
-  ser3.write(0);
-  ser4.write(180);
-  delay(1000);
-  Serial.println("Hello basstards!");
+void executeCommands()
+{
+    if ((!executor.isExecuting() && programRunner.commandsAvailable())
+        || programRunner.hasUrgentCommand()
+    ) {
+        Command command;
+        programRunner.readCommand(command);
+        executor.startExecuting(command, millis());
+    }
+
+    Executor::Event event = executor.run(millis());
+    if (event == Executor::FINISHED && !programRunner.commandsAvailable()) {
+        commandDispatcher.notifyExecutionFinished();
+        reply(outputBuffer, Response::EXEC_FINISH);
+        Serial.print(outputBuffer);
+    }
+}
+
+void setup() 
+{
+    WiFi.mode(WIFI_OFF);
+    Serial.begin(9600);
+    motorsInit();
+}
+
+void loop()
+{
+    handleButton();
+    if (haveSerialInput())
+        processInput();
+    executeCommands();
 }
