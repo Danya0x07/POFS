@@ -19,6 +19,10 @@ private:
     ProgramMemory &memory_;
     ProgramRunner &runner_;
     State state_;
+
+    Status dispatchRealTime(const Command &command);
+    Status dispatchRecording(const Command &command);
+    Status dispatchExecuting(const Command &command);
 };
 
 #endif // _DISPATCHER_HPP

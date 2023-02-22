@@ -18,8 +18,8 @@ public:
     Event run(uint32_t ms);
 
 private:
-    Command lastCommand_;
     Timer &timer_;
+    Command lastCommand_;
     bool executing_;
 };
 

@@ -9,60 +9,11 @@ CommandDispatcher::Status CommandDispatcher::dispatch(const Command &command)
 {
     switch (state_)
     {
-    case REALTIME:
-        if (command.type == CommandType::SAVE_PROGRAM || command.type == CommandType::ERROR)
-            return ERROR;
-        if (command.type == CommandType::LOADING_MODE) {
-            memory_.reset();
-            state_ = RECORDING;
-        } else if (command.type == CommandType::EXECUTE_PROGRAM) {
-            ProgramRunner::Status status = runner_.setupCommandSequence(memory_.getLenUsed());
-            if (status == ProgramRunner::OK) {
-                state_ = EXECUTING;
-            } else {
-                return ERROR;
-            }
-        } else if (command.type == CommandType::RESET) {
-            memory_.reset();
-            runner_.reset();
-        } else {
-            runner_.setExtraordinaryCommand(command);
-            state_ = EXECUTING;
-        }
-        break;
-    
-    case RECORDING:
-        if (command.type == CommandType::LOADING_MODE || command.type == CommandType::EXECUTE_PROGRAM) {
-            memory_.reset();
-            state_ = REALTIME;
-            return ERROR;
-        }
-        if (command.type == CommandType::RESET) {
-            memory_.reset();
-            state_ = REALTIME;
-        } else {
-            ProgramMemory::Status status = memory_.store(command);
-            if (status == ProgramMemory::ERROR) {
-                memory_.reset();
-                state_ = REALTIME;
-                return ERROR;
-            }
-            if (status == ProgramMemory::COMPLETE) {
-                state_ = REALTIME;
-            }
-        }
-        break;
-    
-    case EXECUTING:
-        runner_.reset();
-        runner_.setUrgentCommand(command);
-        state_ = REALTIME;
-        if (command.type != CommandType::RESET)
-            return ERROR;
-        break;
+    case REALTIME: return dispatchRealTime(command);
+    case RECORDING: return dispatchRecording(command);
+    case EXECUTING: return dispatchExecuting(command);
     }
-    
-    return OK;
+    return ERROR;
 }
 
 CommandDispatcher::State CommandDispatcher::getState()
@@ -75,4 +26,110 @@ void CommandDispatcher::notifyExecutionFinished()
     if (state_ == EXECUTING) {
         state_ = REALTIME;
     }
+}
+
+CommandDispatcher::Status CommandDispatcher::dispatchRealTime(const Command &command)
+{
+    Status status = OK;
+    ProgramRunner::Status runStatus;
+
+    switch (command.type)
+    {
+    case CommandType::SET_FLAP:
+    case CommandType::SET_FILTER:
+    case CommandType::WAIT:
+        runner_.setExtraordinaryCommand(command);
+        state_ = EXECUTING;
+        break;
+    
+    case CommandType::LOADING_MODE:
+        memory_.reset();
+        state_ = RECORDING;
+        break;
+    
+    case CommandType::EXECUTE_PROGRAM:
+        runStatus = runner_.setupCommandSequence(memory_.getLenUsed());
+        
+        if (runStatus == ProgramRunner::OK) {
+            state_ = EXECUTING;
+        } else {
+            status = ERROR;
+        }
+        break;
+    
+    case CommandType::RESET:
+        memory_.reset();
+        runner_.reset();
+        break;
+    
+    case CommandType::SAVE_PROGRAM:
+    case CommandType::ERROR:
+        status = ERROR;
+        break;
+    }
+    return status;
+}
+
+CommandDispatcher::Status CommandDispatcher::dispatchRecording(const Command &command)
+{
+    Status status = OK;
+    ProgramMemory::Status memStatus;
+
+    switch (command.type)
+    {
+    case CommandType::SET_FLAP:
+    case CommandType::SET_FILTER:
+    case CommandType::WAIT:
+    case CommandType::SAVE_PROGRAM:
+        memStatus = memory_.store(command);
+        if (memStatus == ProgramMemory::ERROR) {
+            memory_.reset();
+            state_ = REALTIME;
+            status = ERROR;
+        }
+        if (memStatus == ProgramMemory::COMPLETE) {
+            state_ = REALTIME;
+        }
+        break;
+    
+    case CommandType::LOADING_MODE:
+    case CommandType::EXECUTE_PROGRAM:
+    case CommandType::ERROR:
+        memory_.reset();
+        state_ = REALTIME;
+        status = ERROR;
+        break;
+    
+    case CommandType::RESET:
+        memory_.reset();
+        state_ = REALTIME;
+        break;
+    }
+    return status;
+}
+
+CommandDispatcher::Status CommandDispatcher::dispatchExecuting(const Command &command)
+{
+    Status status = OK;
+
+    if (command.type != CommandType::RESET)
+        return ERROR;
+    
+    switch (command.type)
+    {
+    case CommandType::SET_FLAP:
+    case CommandType::SET_FILTER:
+    case CommandType::WAIT:
+    case CommandType::LOADING_MODE:
+    case CommandType::SAVE_PROGRAM:
+    case CommandType::EXECUTE_PROGRAM:
+    case CommandType::ERROR:
+        status = ERROR;
+    case CommandType::RESET:
+        runner_.reset();
+        runner_.setUrgentCommand(command);
+        state_ = REALTIME;
+        break;
+    }
+    return status;
 }

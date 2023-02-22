@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-enum class CommandType {
+enum class CommandType: uint8_t {
     SET_FLAP,
     SET_FILTER,
     WAIT,
@@ -14,19 +14,19 @@ enum class CommandType {
     ERROR
 };
 
-enum class FlapStatus {
+enum class FlapStatus: uint8_t {
     CLOSED, OPENED
 };
 
-enum class FilterState {
+enum class FilterState: uint8_t {
     FS0,
     FS1, FS2, FS3, FS4,
 };
 
 struct LoopData {
-    uint16_t beginMark;
-    uint16_t endMark;
-    uint16_t numRepetitions;
+    uint8_t beginMark;
+    uint8_t endMark;
+    uint8_t numRepetitions;
 };
 
 struct Command {
