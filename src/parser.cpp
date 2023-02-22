@@ -109,7 +109,7 @@ ParsingStatus parse(const char *input, Command &cmd)
         if (tmp < 0 || tmp > 10000) {
             return ParsingStatus::ERROR;
         }
-        cmd.loop.numIterations = (uint16_t) tmp;
+        cmd.loop.numRepetitions = (uint16_t) tmp;
 
         if (nextParameter(marker, &tmp))
             return ParsingStatus::ERROR;

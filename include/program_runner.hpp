@@ -16,6 +16,17 @@ public:
     bool hasUrgentCommand();
     Status readCommand(Command &command);
     void reset();
+
+private:
+    Command extraordinaryCommand_;
+    Command urgentCommand_;
+    LoopData loopData_;
+    const Command *commandBuffer_;
+    int sequenceLen_;
+    int currentIndex_;
+    int commandsLeft_;
+
+    bool hasExtraordinaryCommand();
 };
 
 #endif // _PROGRAM_RUNNER_HPP

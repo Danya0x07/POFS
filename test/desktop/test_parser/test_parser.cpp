@@ -79,7 +79,7 @@ void Test_CorrectCommands()
     TEST_ASSERT_EQUAL(CommandType::SAVE_PROGRAM, cmd.type);
     TEST_ASSERT_EQUAL(3, cmd.loop.beginMark);
     TEST_ASSERT_EQUAL(6, cmd.loop.endMark);
-    TEST_ASSERT_EQUAL(5, cmd.loop.numIterations);
+    TEST_ASSERT_EQUAL(5, cmd.loop.numRepetitions);
 
     status = parse("E", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);

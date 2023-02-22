@@ -1,9 +1,10 @@
 #include <unity.h>
 #include <program_runner.hpp>
 #include <string.h>
+#include <iostream>
 
 const Command commandBufferFull[15] = {
-    [0] = {.type = CommandType::SAVE_PROGRAM, .loop = {.beginMark = 6, .endMark = 9, .numIterations = 4}},
+    [0] = {.type = CommandType::SAVE_PROGRAM, .loop = {.beginMark = 6, .endMark = 9, .numRepetitions = 3}},
     
     [1] = {.type = CommandType::WAIT, .waitTime = 1000},
 
@@ -35,32 +36,36 @@ void Test_FullCommandSequence()
     TEST_ASSERT_EQUAL(ProgramRunner::OK, status);
     TEST_ASSERT_EQUAL(26, programRunner.commandsAvailable());
 
+    int commandsLeft = sequenceLen 
+        + (commandBufferFull[0].loop.endMark - commandBufferFull[0].loop.beginMark + 1)
+        * (commandBufferFull[0].loop.numRepetitions);
+
     for (int i = 1; i <= 5; i++) {
         status = programRunner.readCommand(command);
         TEST_ASSERT_EQUAL(ProgramRunner::OK, status);
-        sequenceLen--;
+        commandsLeft--;
         TEST_ASSERT_EQUAL_MEMORY(&commandBufferFull[i], &command, sizeof(Command));
-        TEST_ASSERT_EQUAL(sequenceLen, programRunner.commandsAvailable());
+        TEST_ASSERT_EQUAL(commandsLeft, programRunner.commandsAvailable());
     }
-
-    for (int j = 0; j < 4; j++) {
+    for (int j = 0; j < 1 + 3; j++) {
         for (int i = 6; i <= 9; i++) {
             status = programRunner.readCommand(command);
             TEST_ASSERT_EQUAL(ProgramRunner::OK, status);
-            sequenceLen--;
+            commandsLeft--;
             TEST_ASSERT_EQUAL_MEMORY(&commandBufferFull[i], &command, sizeof(Command));
-            TEST_ASSERT_EQUAL(sequenceLen, programRunner.commandsAvailable());
+            TEST_ASSERT_EQUAL(commandsLeft, programRunner.commandsAvailable());
         }
     }
 
     for (int i = 10; i <= 14; i++) {
+        std::cout << "Iteration " << i << std::endl;
         status = programRunner.readCommand(command);
         TEST_ASSERT_EQUAL(ProgramRunner::OK, status);
-        sequenceLen--;
+        commandsLeft--;
         TEST_ASSERT_EQUAL_MEMORY(&commandBufferFull[i], &command, sizeof(Command));
-        TEST_ASSERT_EQUAL(sequenceLen, programRunner.commandsAvailable());
+        TEST_ASSERT_EQUAL(commandsLeft, programRunner.commandsAvailable());
     }
-    TEST_ASSERT_EQUAL(0, sequenceLen);
+    TEST_ASSERT_EQUAL(0, commandsLeft);
     status = programRunner.readCommand(command);
     TEST_ASSERT_EQUAL(ProgramRunner::ERROR, status);
 }
@@ -72,10 +77,11 @@ void Test_SequenceWithoutLoop()
     memcpy(cmdBuffer, commandBufferFull, 10 * sizeof(Command));
     cmdBuffer[0].loop.beginMark = 0;
     cmdBuffer[0].loop.endMark = 0;
-    cmdBuffer[0].loop.numIterations = 0;
+    cmdBuffer[0].loop.numRepetitions = 0;
 
     ProgramRunner programRunner(cmdBuffer);
     int sequenceLen = sizeof(cmdBuffer) / sizeof(cmdBuffer[0]) - 1;
+    int commandsLeft = sequenceLen;
 
     ProgramRunner::Status status = programRunner.setupCommandSequence(sequenceLen);
     TEST_ASSERT_EQUAL(ProgramRunner::OK, status);
@@ -85,11 +91,11 @@ void Test_SequenceWithoutLoop()
     for (int i = 1; i <= 9; i++) {
         status = programRunner.readCommand(command);
         TEST_ASSERT_EQUAL(ProgramRunner::OK, status);
-        sequenceLen--;
+        commandsLeft--;
         TEST_ASSERT_EQUAL_MEMORY(&cmdBuffer[i], &command, sizeof(Command));
-        TEST_ASSERT_EQUAL(sequenceLen, programRunner.commandsAvailable());
+        TEST_ASSERT_EQUAL(commandsLeft, programRunner.commandsAvailable());
     }
-    TEST_ASSERT_EQUAL(0, sequenceLen);
+    TEST_ASSERT_EQUAL(0, commandsLeft);
     status = programRunner.readCommand(command);
     TEST_ASSERT_EQUAL(ProgramRunner::ERROR, status);
 }

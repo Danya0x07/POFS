@@ -26,7 +26,7 @@ enum class FilterState {
 struct LoopData {
     uint16_t beginMark;
     uint16_t endMark;
-    uint16_t numIterations;
+    uint16_t numRepetitions;
 };
 
 struct Command {

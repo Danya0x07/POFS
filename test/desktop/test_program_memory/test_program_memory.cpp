@@ -65,7 +65,7 @@ void Test_LoopBounds()
         TEST_ASSERT_EQUAL(ProgramMemory::STORE, memory.store(correctCommands[i]));
     }
 
-    Command command = {.type = CommandType::SAVE_PROGRAM, .loop = {.beginMark = 5, .endMark = 4, .numIterations = 3}};
+    Command command = {.type = CommandType::SAVE_PROGRAM, .loop = {.beginMark = 5, .endMark = 4, .numRepetitions = 3}};
     TEST_ASSERT_EQUAL(ProgramMemory::ERROR, memory.store(command));
 
     command.loop.beginMark = 20;

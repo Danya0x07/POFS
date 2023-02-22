@@ -45,7 +45,7 @@ void Test_RealTimeState()
     TEST_ASSERT_EQUAL(CommandDispatcher::ERROR, dispatcher.dispatch(command));
     TEST_ASSERT_EQUAL(CommandDispatcher::REALTIME, dispatcher.getState());
 
-    command = {.type = CommandType::SAVE_PROGRAM, .loop = {.beginMark = 2, .endMark = 2, .numIterations = 2}};
+    command = {.type = CommandType::SAVE_PROGRAM, .loop = {.beginMark = 2, .endMark = 2, .numRepetitions = 2}};
     TEST_ASSERT_EQUAL(CommandDispatcher::ERROR, dispatcher.dispatch(command));
     TEST_ASSERT_EQUAL(CommandDispatcher::REALTIME, dispatcher.getState());
 }
@@ -87,7 +87,7 @@ void Test_RecordingStateComplete()
 
     setupSomeSequence(dispatcher);
 
-    command = {.type = CommandType::SAVE_PROGRAM, .loop = {.beginMark = 2, .endMark = 4, .numIterations = 3}};
+    command = {.type = CommandType::SAVE_PROGRAM, .loop = {.beginMark = 2, .endMark = 4, .numRepetitions = 3}};
     TEST_ASSERT_EQUAL(CommandDispatcher::OK, dispatcher.dispatch(command));
     TEST_ASSERT_EQUAL(CommandDispatcher::REALTIME, dispatcher.getState());
 }
