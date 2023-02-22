@@ -12,6 +12,12 @@ public:
     Status store(const Command &command);
     void reset();
     int getLenUsed();
+
+private:
+    Command *commandBuffer_;
+    const int bufferLen_;
+    int lenUsed_;
+    int index_;
 };
 
 #endif // _PROGRAM_MEMORY_HPP

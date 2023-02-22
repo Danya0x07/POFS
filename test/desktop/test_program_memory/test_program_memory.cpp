@@ -61,7 +61,7 @@ void Test_LoopBounds()
     const int buffLen = sizeof(correctCommands) / sizeof(correctCommands[0]);
 
     TEST_ASSERT_EQUAL(ProgramMemory::START, memory.store(correctCommands[0]));
-    for (int i = 1; i < buffLen - 1; i++) {
+    for (int i = 1; i < buffLen; i++) {
         TEST_ASSERT_EQUAL(ProgramMemory::STORE, memory.store(correctCommands[i]));
     }
 
@@ -76,7 +76,7 @@ void Test_LoopBounds()
     command.loop.beginMark = 3;
     command.loop.endMark = 6;
     TEST_ASSERT_EQUAL(ProgramMemory::COMPLETE, memory.store(command));
-    TEST_ASSERT_EQUAL(0, memory.getLenUsed());
+    TEST_ASSERT_EQUAL(buffLen, memory.getLenUsed());
 
     command.loop.beginMark = 0;
     command.loop.endMark = 0;
