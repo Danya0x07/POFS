@@ -16,6 +16,11 @@ public:
     bool isExecuting();
     void stopExecuting();
     Event run(uint32_t ms);
+
+private:
+    Command lastCommand_;
+    Timer &timer_;
+    bool executing_;
 };
 
 #endif // _EXECUTOR_HPP
