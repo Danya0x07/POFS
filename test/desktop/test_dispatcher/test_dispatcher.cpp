@@ -37,8 +37,6 @@ void Test_RealTimeState()
 
     command = {.type = CommandType::RESET};
     TEST_ASSERT_EQUAL(CommandDispatcher::OK, dispatcher.dispatch(command));
-    TEST_ASSERT_EQUAL(CommandDispatcher::EXECUTING, dispatcher.getState());
-    dispatcher.notifyExecutionFinished();
     TEST_ASSERT_EQUAL(CommandDispatcher::REALTIME, dispatcher.getState());
 
     command = {.type = CommandType::EXECUTE_PROGRAM};
