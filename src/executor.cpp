@@ -55,6 +55,17 @@ Executor::Event Executor::run(uint32_t ms)
         }
         break;
     
+    case CommandType::CALIBRATE:
+        motorCalibrate(lastCommand_.calibration);
+        executing_ = false;
+        break;
+    
+    case CommandType::SAVE_CALIBRATION:
+        if (motorsHaveUnsavedCalibrationData())
+            motorsSaveAngles();
+        executing_ = false;
+        break;
+    
     case CommandType::RESET:
         stopExecuting();
         break;

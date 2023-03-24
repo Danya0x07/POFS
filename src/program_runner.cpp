@@ -46,7 +46,6 @@ void ProgramRunner::setUrgentCommand(const Command &command)
 
 int ProgramRunner::commandsAvailable()
 {
-    
     return hasExtraordinaryCommand() + hasUrgentCommand() + commandsLeft_;
 }
 

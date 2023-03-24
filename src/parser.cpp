@@ -1,4 +1,5 @@
 #include "parser.hpp"
+#include "motors.hpp"
 #include <string.h>
 #include <stdlib.h>
 
@@ -23,6 +24,12 @@ static CommandType retrieveCommandType(const char *input)
     
     case CMDKEY_EXEC:
         return CommandType::EXECUTE_PROGRAM;
+    
+    case CMDKEY_CALIB:
+        return CommandType::CALIBRATE;
+    
+    case CMDKEY_SAVE:
+        return CommandType::SAVE_CALIBRATION;
     
     case CMDKEY_RST:
         return CommandType::RESET;
@@ -82,7 +89,7 @@ ParsingStatus parse(const char *input, Command &cmd)
 
     case CommandType::WAIT:
         cmd.waitTime = atol(input + 1);
-        if (cmd.waitTime > 3600000L || 
+        if (cmd.waitTime > 36000000L || 
             uint32_t(input[strlen(input) - 1] - '0') != cmd.waitTime % 10)
             return ParsingStatus::ERROR;
         break;
@@ -119,6 +126,36 @@ ParsingStatus parse(const char *input, Command &cmd)
         break;
 
     case CommandType::EXECUTE_PROGRAM:
+        if (input[1] != '\0')
+            return ParsingStatus::ERROR;
+        break;
+    
+    case CommandType::CALIBRATE:
+        marker = input + 1;
+        tmp = atoi(marker);
+        if (tmp > NUM_MOTORS)
+            return ParsingStatus::ERROR;
+        cmd.calibration.motorID = (MotorID)tmp;
+
+        if (!(marker = nextParameter(marker, &tmp))) {
+            return ParsingStatus::ERROR;
+        }
+        if (tmp > 180)
+            return ParsingStatus::ERROR;
+        cmd.calibration.openedAngle = (MotorID)tmp;
+
+        if (!(marker = nextParameter(marker, &tmp))) {
+            return ParsingStatus::ERROR;
+        }
+        if (tmp > 180)
+            return ParsingStatus::ERROR;
+        cmd.calibration.closedAngle = (MotorID)tmp;
+
+        if (nextParameter(marker, &tmp))
+            return ParsingStatus::ERROR;
+        break;
+
+    case CommandType::SAVE_CALIBRATION:
         if (input[1] != '\0')
             return ParsingStatus::ERROR;
         break;

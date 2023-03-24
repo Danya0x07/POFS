@@ -38,6 +38,8 @@ CommandDispatcher::Status CommandDispatcher::dispatchRealTime(const Command &com
     case CommandType::SET_FLAP:
     case CommandType::SET_FILTER:
     case CommandType::WAIT:
+    case CommandType::CALIBRATE:
+    case CommandType::SAVE_CALIBRATION:
         runner_.setExtraordinaryCommand(command);
         state_ = EXECUTING;
         break;
@@ -95,6 +97,8 @@ CommandDispatcher::Status CommandDispatcher::dispatchRecording(const Command &co
     
     case CommandType::LOADING_MODE:
     case CommandType::EXECUTE_PROGRAM:
+    case CommandType::CALIBRATE:
+    case CommandType::SAVE_CALIBRATION:
     case CommandType::ERROR:
         memory_.reset();
         state_ = REALTIME;
@@ -113,9 +117,6 @@ CommandDispatcher::Status CommandDispatcher::dispatchRecording(const Command &co
 CommandDispatcher::Status CommandDispatcher::dispatchExecuting(const Command &command)
 {
     Status status = OK;
-
-    if (command.type != CommandType::RESET)
-        return ERROR;
     
     switch (command.type)
     {
@@ -125,8 +126,11 @@ CommandDispatcher::Status CommandDispatcher::dispatchExecuting(const Command &co
     case CommandType::LOADING_MODE:
     case CommandType::SAVE_PROGRAM:
     case CommandType::EXECUTE_PROGRAM:
+    case CommandType::CALIBRATE:
+    case CommandType::SAVE_CALIBRATION:
     case CommandType::ERROR:
         status = ERROR;
+        break;
     case CommandType::RESET:
         runner_.reset();
         runner_.setUrgentCommand(command);

@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <EEPROM.h>
 #include <Button.h>
 #include "dispatcher.hpp"
 #include "motors.hpp"
@@ -111,7 +112,10 @@ void executeCommands()
 void setup() 
 {
     WiFi.mode(WIFI_OFF);
+    WiFi.setSleepMode(WIFI_MODEM_SLEEP);
+    WiFi.forceSleepBegin();
     Serial.begin(9600);
+    EEPROM.begin(100);
     motorsInit();
 }
 

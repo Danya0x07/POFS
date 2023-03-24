@@ -3,7 +3,14 @@
 
 #include "commands.hpp"
 
+#define NUM_MOTORS 5
+
+void motorsSaveAngles();
+
 void motorsInit();
+void motorCalibrate(CalibrationData calibration);
+
+bool motorsHaveUnsavedCalibrationData();
 
 void flapSet(FlapStatus status);
 FlapStatus flapGet();

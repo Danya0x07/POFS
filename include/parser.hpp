@@ -9,6 +9,8 @@
 #define CMDKEY_LOAD     'L'
 #define CMDKEY_PROG     'P'
 #define CMDKEY_EXEC     'E'
+#define CMDKEY_CALIB    'C'
+#define CMDKEY_SAVE     'S'
 #define CMDKEY_RST      'R'
 
 enum class ParsingStatus {OK, ERROR};

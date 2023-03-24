@@ -11,6 +11,8 @@ enum class CommandType: uint8_t {
     SAVE_PROGRAM,
     EXECUTE_PROGRAM,
     RESET,
+    CALIBRATE,
+    SAVE_CALIBRATION,
     ERROR
 };
 
@@ -23,10 +25,21 @@ enum class FilterState: uint8_t {
     FS1, FS2, FS3, FS4,
 };
 
+enum MotorID : uint8_t {
+    FLAP, 
+    F1, F2, F3, F4
+};
+
 struct LoopData {
     uint8_t beginMark;
     uint8_t endMark;
     uint8_t numRepetitions;
+};
+
+struct CalibrationData {
+    MotorID motorID;
+    uint8_t openedAngle;
+    uint8_t closedAngle;
 };
 
 struct Command {
@@ -36,6 +49,7 @@ struct Command {
         FilterState filterState;
         uint32_t waitTime;
         LoopData loop;
+        CalibrationData calibration;
     };
 };
 

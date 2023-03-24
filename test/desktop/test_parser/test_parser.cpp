@@ -14,7 +14,9 @@ void Test_IncorectCommands()
         "L5", "L -6",
         "P6,2,3", "P2,3", "P3", "P", "P2,6,3,4", "PZ",
         "E5", "E -6",
-        "R5", "R -6"
+        "R5", "R -6",
+        "C2,3", "C3", "C", "C2,6,3,4", "CZ",
+        "S1", "S1 2"
     };
     ParsingStatus status;
     Command cmd;
@@ -84,6 +86,17 @@ void Test_CorrectCommands()
     status = parse("E", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::EXECUTE_PROGRAM, cmd.type);
+
+    status = parse("C3,20,170", cmd);
+    TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
+    TEST_ASSERT_EQUAL(CommandType::CALIBRATE, cmd.type);
+    TEST_ASSERT_EQUAL(MotorID::F3, cmd.calibration.motorID);
+    TEST_ASSERT_EQUAL(20, cmd.calibration.openedAngle);
+    TEST_ASSERT_EQUAL(170, cmd.calibration.closedAngle);
+
+    status = parse("S", cmd);
+    TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
+    TEST_ASSERT_EQUAL(CommandType::SAVE_CALIBRATION, cmd.type);
 
     status = parse("R", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);

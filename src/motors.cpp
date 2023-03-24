@@ -2,10 +2,12 @@
 #include "pinconfig.hpp"
 
 #ifdef ARDUINO
-#   include <Servo.h>
+#include <Servo.h>
+#include <EEPROM.h>
 #else
-#   include <stdio.h>
-#   define pinMode(pin, mode) 
+#include <stdio.h>
+#include <cstring>
+#define pinMode(pin, mode)
 
 class Servo
 {
@@ -27,50 +29,137 @@ public:
         printf("Servo %d written angle %d\n", pin_, value);
     }
 };
-#endif
 
-Servo s0, s1, s2, s3, s4;
+class _EEPROM_mock
+{
+public:
+    uint8_t read(const uint8_t addr)
+    {
+        printf("Read at address %d", addr);
+        return 0;
+    }
 
-#define S0_INACT    0
-#define S0_ACT  180
-#define S1_INACT    0
-#define S1_ACT  180
-#define S2_INACT    0
-#define S2_ACT  180
-#define S3_INACT    0
-#define S3_ACT  180
-#define S4_INACT    0
-#define S4_ACT  180
+    uint8_t write(const uint8_t addr, const uint8_t value)
+    {
+        printf("Write %d at address %d", value, addr);
+    }
 
-FlapStatus flapStatus;
-FilterState filterState;
+    void commit()
+    {
+        printf("Commit changes");
+    }
+} EEPROM;
+#endif // ARDUINO
+
+#define EEPROM_START_ADDR 0
+#define EEPROM_MARK 0xC0DE
+
+static FlapStatus flapStatus;
+static FilterState filterState;
+
+static Servo motors[NUM_MOTORS];
+
+static const uint8_t openedAnglesDefault[NUM_MOTORS] = {
+    [MotorID::FLAP] = 0,
+    [MotorID::F1] = 0,
+    [MotorID::F2] = 0,
+    [MotorID::F3] = 0,
+    [MotorID::F4] = 0,
+};
+
+static const uint8_t closedAnglesDefault[NUM_MOTORS] = {
+    [MotorID::FLAP] = 90,
+    [MotorID::F1] = 90,
+    [MotorID::F2] = 90,
+    [MotorID::F3] = 90,
+    [MotorID::F4] = 90,
+};
+
+static uint8_t openedAngles[NUM_MOTORS];
+static uint8_t closedAngles[NUM_MOTORS];
+bool haveUnsavedCalibration = false;
+
+static void loadAngles()
+{
+    uint8_t address = EEPROM_START_ADDR;
+    uint16_t mark = EEPROM.read(address++);
+    mark = mark << 8 | EEPROM.read(address++);
+
+    if (mark == EEPROM_MARK)
+    {
+        for (uint8_t i = 0; i < NUM_MOTORS; i++)
+        {
+            uint8_t angle = EEPROM.read(address++);
+            if (angle > 180)
+                angle = openedAnglesDefault[i];
+            openedAngles[i] = angle;
+        }
+        for (uint8_t i = 0; i < NUM_MOTORS; i++)
+        {
+            uint8_t angle = EEPROM.read(address++);
+            if (angle > 180)
+                angle = closedAnglesDefault[i];
+            closedAngles[i] = angle;
+        }
+    }
+    else
+    {
+        memcpy(openedAngles, openedAnglesDefault, sizeof(openedAngles));
+        memcpy(closedAngles, closedAnglesDefault, sizeof(closedAngles));
+    }
+}
+
+void motorsSaveAngles()
+{
+    uint8_t address = EEPROM_START_ADDR;
+
+    EEPROM.write(address++, EEPROM_MARK >> 8);
+    EEPROM.write(address++, EEPROM_MARK & 0xFF);
+
+    for (uint8_t angle : openedAngles)
+    {
+        EEPROM.write(address++, angle);
+    }
+    for (uint8_t angle : closedAngles)
+    {
+        EEPROM.write(address++, angle);
+    }
+    EEPROM.commit();
+    haveUnsavedCalibration = false;
+}
+
+bool motorsHaveUnsavedCalibrationData()
+{
+    return haveUnsavedCalibration;
+}
 
 void motorsInit()
 {
-    pinMode(PIN_S0, OUTPUT);
-    pinMode(PIN_S1, OUTPUT);
-    pinMode(PIN_S2, OUTPUT);
-    pinMode(PIN_S3, OUTPUT);
-    pinMode(PIN_S4, OUTPUT);
+    const uint8_t pins[NUM_MOTORS] = {PIN_S0, PIN_S1, PIN_S2, PIN_S3, PIN_S4};
 
-    if (!s0.attached())
-        s0.attach(PIN_S0);
-    if (!s1.attached())
-        s1.attach(PIN_S1);
-    if (!s2.attached())
-        s2.attach(PIN_S2);
-    if (!s3.attached())
-        s3.attach(PIN_S3);
-    if (!s4.attached())
-        s4.attach(PIN_S4);
-    
+    for (uint8_t i = 0; i < NUM_MOTORS; i++)
+    {
+        pinMode(pins[i], OUTPUT);
+        motors[i].attach(pins[i]);
+    }
+
+    loadAngles();
+
     flapSet(FlapStatus::CLOSED);
     filterSet(FilterState::FS0);
 }
 
+void motorCalibrate(CalibrationData calibration)
+{
+    openedAngles[calibration.motorID] = calibration.openedAngle;
+    closedAngles[calibration.motorID] = calibration.closedAngle;
+    haveUnsavedCalibration = true;
+}
+
 void flapSet(FlapStatus status)
 {
-    s0.write(status == FlapStatus::OPENED ? S0_ACT : S0_INACT);
+    motors[MotorID::FLAP].write(status == FlapStatus::OPENED ? openedAngles[MotorID::FLAP] : closedAngles[MotorID::FLAP]);
+
     flapStatus = status;
 }
 
@@ -81,10 +170,10 @@ FlapStatus flapGet()
 
 void filterSet(FilterState state)
 {
-    s1.write(state == FilterState::FS1 ? S1_ACT : S1_INACT);
-    s2.write(state == FilterState::FS2 ? S2_ACT : S2_INACT);
-    s3.write(state == FilterState::FS3 ? S3_ACT : S3_INACT);
-    s4.write(state == FilterState::FS4 ? S4_ACT : S4_INACT);
+    motors[MotorID::F1].write(state == FilterState::FS1 ? openedAngles[MotorID::F1] : closedAngles[MotorID::F1]);
+    motors[MotorID::F2].write(state == FilterState::FS2 ? openedAngles[MotorID::F2] : closedAngles[MotorID::F2]);
+    motors[MotorID::F3].write(state == FilterState::FS3 ? openedAngles[MotorID::F3] : closedAngles[MotorID::F3]);
+    motors[MotorID::F4].write(state == FilterState::FS4 ? openedAngles[MotorID::F4] : closedAngles[MotorID::F4]);
     filterState = state;
 }
 
