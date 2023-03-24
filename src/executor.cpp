@@ -70,9 +70,10 @@ Executor::Event Executor::run(uint32_t ms)
         stopExecuting();
         break;
     
-    case CommandType::_EMERGENCY:
+    case CommandType::EMERGENCY:
         flapSet(FlapStatus::CLOSED);
         filterSet(FilterState::FS0);
+        executing_ = false;
         break;
     
     default:
@@ -80,4 +81,9 @@ Executor::Event Executor::run(uint32_t ms)
     }
 
     return executing_ ? NOTHING : FINISHED;
+}
+
+const Command &Executor::getLastCommand()
+{
+    return lastCommand_;
 }

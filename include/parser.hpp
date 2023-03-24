@@ -3,16 +3,6 @@
 
 #include "commands.hpp"
 
-#define CMDKEY_FLAP     'G'
-#define CMDKEY_FILTER   'F'
-#define CMDKEY_WAIT     'W'
-#define CMDKEY_LOAD     'L'
-#define CMDKEY_PROG     'P'
-#define CMDKEY_EXEC     'E'
-#define CMDKEY_CALIB    'C'
-#define CMDKEY_SAVE     'S'
-#define CMDKEY_RST      'R'
-
 enum class ParsingStatus {OK, ERROR};
 
 ParsingStatus parse(const char *input, Command &cmd);

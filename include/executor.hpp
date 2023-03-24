@@ -16,6 +16,7 @@ public:
     bool isExecuting();
     void stopExecuting();
     Event run(uint32_t ms);
+    const Command &getLastCommand();
 
 private:
     Timer &timer_;

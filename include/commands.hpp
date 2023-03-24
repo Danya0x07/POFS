@@ -14,10 +14,19 @@ enum class CommandType: uint8_t {
     CALIBRATE,
     SAVE_CALIBRATION,
     ERROR,
-
-    // internal only
-    _EMERGENCY,
+    EMERGENCY,
 };
+
+#define CMDKEY_FLAP     'G'
+#define CMDKEY_FILTER   'F'
+#define CMDKEY_WAIT     'W'
+#define CMDKEY_LOAD     'L'
+#define CMDKEY_PROG     'P'
+#define CMDKEY_EXEC     'E'
+#define CMDKEY_CALIB    'C'
+#define CMDKEY_SAVE     'S'
+#define CMDKEY_RST      'R'
+#define CMDKEY_EMG      '!'
 
 enum class FlapStatus: uint8_t {
     CLOSED, OPENED

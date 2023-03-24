@@ -60,7 +60,7 @@ CommandDispatcher::Status CommandDispatcher::dispatchRealTime(const Command &com
         break;
     
     case CommandType::RESET:
-    case CommandType::_EMERGENCY:
+    case CommandType::EMERGENCY:
         memory_.reset();
         runner_.reset();
         runner_.setUrgentCommand(command);
@@ -101,13 +101,13 @@ CommandDispatcher::Status CommandDispatcher::dispatchRecording(const Command &co
     case CommandType::CALIBRATE:
     case CommandType::SAVE_CALIBRATION:
     case CommandType::ERROR:
-    case CommandType::_EMERGENCY:
         memory_.reset();
         state_ = REALTIME;
         status = ERROR;
         break;
     
     case CommandType::RESET:
+    case CommandType::EMERGENCY:
         memory_.reset();
         state_ = REALTIME;
         runner_.setUrgentCommand(command);
@@ -131,10 +131,10 @@ CommandDispatcher::Status CommandDispatcher::dispatchExecuting(const Command &co
     case CommandType::CALIBRATE:
     case CommandType::SAVE_CALIBRATION:
     case CommandType::ERROR:
-    case CommandType::_EMERGENCY:
         status = ERROR;
         break;
     case CommandType::RESET:
+    case CommandType::EMERGENCY:
         runner_.reset();
         runner_.setUrgentCommand(command);
         state_ = REALTIME;

@@ -14,7 +14,7 @@
 #include "pinconfig.hpp"
 
 char inputBuffer[64];
-char outputBuffer[4];
+char outputBuffer[64];
 Command commandBuffer[100];
 ProgramMemory programMemory(commandBuffer, sizeof(commandBuffer) / sizeof(Command));
 ProgramRunner programRunner(commandBuffer);
@@ -65,7 +65,7 @@ void handleButton()
             command.flapStatus = flapGet() == FlapStatus::CLOSED ? FlapStatus::OPENED : FlapStatus::CLOSED;
             commandDispatcher.dispatch(command);
         } else if (dispatcherState == CommandDispatcher::EXECUTING) {
-            command.type = CommandType::_EMERGENCY;
+            command.type = CommandType::EMERGENCY;
             commandDispatcher.dispatch(command);
         }
     }
@@ -105,6 +105,8 @@ void executeCommands()
     if (event == Executor::FINISHED && !programRunner.commandsAvailable()) {
         commandDispatcher.notifyExecutionFinished();
         reply(outputBuffer, Response::EXEC_FINISH);
+        Serial.print(outputBuffer);
+        echo(outputBuffer, executor.getLastCommand());
         Serial.print(outputBuffer);
     }
 }
