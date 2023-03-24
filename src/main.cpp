@@ -65,7 +65,7 @@ void handleButton()
             command.flapStatus = flapGet() == FlapStatus::CLOSED ? FlapStatus::OPENED : FlapStatus::CLOSED;
             commandDispatcher.dispatch(command);
         } else if (dispatcherState == CommandDispatcher::EXECUTING) {
-            command.type = CommandType::RESET;
+            command.type = CommandType::_EMERGENCY;
             commandDispatcher.dispatch(command);
         }
     }
@@ -117,6 +117,8 @@ void setup()
     Serial.begin(9600);
     EEPROM.begin(100);
     motorsInit();
+    filterSet(FilterState::FS0);
+    flapSet(FlapStatus::OPENED);
 }
 
 void loop()

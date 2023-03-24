@@ -13,7 +13,10 @@ enum class CommandType: uint8_t {
     RESET,
     CALIBRATE,
     SAVE_CALIBRATION,
-    ERROR
+    ERROR,
+
+    // internal only
+    _EMERGENCY,
 };
 
 enum class FlapStatus: uint8_t {

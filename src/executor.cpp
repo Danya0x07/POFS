@@ -70,6 +70,11 @@ Executor::Event Executor::run(uint32_t ms)
         stopExecuting();
         break;
     
+    case CommandType::_EMERGENCY:
+        flapSet(FlapStatus::CLOSED);
+        filterSet(FilterState::FS0);
+        break;
+    
     default:
         break;
     }
