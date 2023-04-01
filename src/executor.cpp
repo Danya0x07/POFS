@@ -66,14 +66,16 @@ Executor::Event Executor::run(uint32_t ms)
         executing_ = false;
         break;
     
-    case CommandType::RESET:
-        stopExecuting();
+    case CommandType::PRINT_CALIBRATION:
+        motorsPrintCalibration();
+        executing_ = false;
         break;
     
     case CommandType::EMERGENCY:
         flapSet(FlapStatus::CLOSED);
         filterSet(FilterState::FS0);
-        executing_ = false;
+    case CommandType::RESET:
+        stopExecuting();
         break;
     
     default:

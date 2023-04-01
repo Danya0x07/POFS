@@ -31,6 +31,9 @@ static CommandType retrieveCommandType(const char *input)
     case CMDKEY_SAVE:
         return CommandType::SAVE_CALIBRATION;
     
+    case CMDKEY_PRINT:
+        return CommandType::PRINT_CALIBRATION;
+    
     case CMDKEY_RST:
         return CommandType::RESET;
     
@@ -159,6 +162,7 @@ ParsingStatus parse(const char *input, Command &cmd)
         break;
 
     case CommandType::SAVE_CALIBRATION:
+    case CommandType::PRINT_CALIBRATION:
     case CommandType::RESET:
     case CommandType::EMERGENCY:
         if (input[1] != '\0')

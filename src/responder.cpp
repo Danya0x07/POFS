@@ -50,6 +50,7 @@ static char getCmdKey(CommandType cmdType)
     case CommandType::RESET: return CMDKEY_RST;
     case CommandType::CALIBRATE: return CMDKEY_CALIB;
     case CommandType::SAVE_CALIBRATION: return CMDKEY_SAVE;
+    case CommandType::PRINT_CALIBRATION: return CMDKEY_PRINT;
     case CommandType::EMERGENCY: return CMDKEY_EMG;
     case CommandType::ERROR: return '\0';
     }
@@ -91,6 +92,7 @@ void echo(char *output, const Command &cmd)
     case CommandType::EXECUTE_PROGRAM:
     case CommandType::RESET:
     case CommandType::SAVE_CALIBRATION:
+    case CommandType::PRINT_CALIBRATION:
     case CommandType::EMERGENCY:
     case CommandType::ERROR:
         break;

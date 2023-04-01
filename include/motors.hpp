@@ -9,6 +9,7 @@ void motorsSaveAngles();
 
 void motorsInit();
 void motorCalibrate(CalibrationData calibration);
+void motorsPrintCalibration();
 
 bool motorsHaveUnsavedCalibrationData();
 

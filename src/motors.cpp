@@ -4,10 +4,15 @@
 #ifdef ARDUINO
 #include <Servo.h>
 #include <EEPROM.h>
+
+#define PRINT   Serial.print
+
 #else
 #include <stdio.h>
 #include <cstring>
+
 #define pinMode(pin, mode)
+#define PRINT   printf
 
 class Servo
 {
@@ -154,6 +159,19 @@ void motorCalibrate(CalibrationData calibration)
     openedAngles[calibration.motorID] = calibration.openedAngle;
     closedAngles[calibration.motorID] = calibration.closedAngle;
     haveUnsavedCalibration = true;
+}
+
+void motorsPrintCalibration()
+{
+    char buff[64];
+    snprintf(buff, sizeof(buff), "%d,%d;%d,%d;%d,%d;%d,%d;%d,%d;\n", 
+            openedAngles[MotorID::FLAP], closedAngles[MotorID::FLAP],
+            openedAngles[MotorID::F1], closedAngles[MotorID::F1],
+            openedAngles[MotorID::F2], closedAngles[MotorID::F2],
+            openedAngles[MotorID::F3], closedAngles[MotorID::F3],
+            openedAngles[MotorID::F4], closedAngles[MotorID::F4]
+    );
+    PRINT(buff);
 }
 
 void flapSet(FlapStatus status)

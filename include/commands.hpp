@@ -13,6 +13,7 @@ enum class CommandType: uint8_t {
     RESET,
     CALIBRATE,
     SAVE_CALIBRATION,
+    PRINT_CALIBRATION,
     ERROR,
     EMERGENCY,
 };
@@ -25,6 +26,7 @@ enum class CommandType: uint8_t {
 #define CMDKEY_EXEC     'E'
 #define CMDKEY_CALIB    'C'
 #define CMDKEY_SAVE     'S'
+#define CMDKEY_PRINT    'c'
 #define CMDKEY_RST      'R'
 #define CMDKEY_EMG      '!'
 

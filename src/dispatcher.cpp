@@ -40,6 +40,7 @@ CommandDispatcher::Status CommandDispatcher::dispatchRealTime(const Command &com
     case CommandType::WAIT:
     case CommandType::CALIBRATE:
     case CommandType::SAVE_CALIBRATION:
+    case CommandType::PRINT_CALIBRATION:
         runner_.setExtraordinaryCommand(command);
         state_ = EXECUTING;
         break;
@@ -100,6 +101,7 @@ CommandDispatcher::Status CommandDispatcher::dispatchRecording(const Command &co
     case CommandType::EXECUTE_PROGRAM:
     case CommandType::CALIBRATE:
     case CommandType::SAVE_CALIBRATION:
+    case CommandType::PRINT_CALIBRATION:
     case CommandType::ERROR:
         memory_.reset();
         state_ = REALTIME;
@@ -130,6 +132,7 @@ CommandDispatcher::Status CommandDispatcher::dispatchExecuting(const Command &co
     case CommandType::EXECUTE_PROGRAM:
     case CommandType::CALIBRATE:
     case CommandType::SAVE_CALIBRATION:
+    case CommandType::PRINT_CALIBRATION:
     case CommandType::ERROR:
         status = ERROR;
         break;
