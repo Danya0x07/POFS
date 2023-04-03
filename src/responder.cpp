@@ -13,30 +13,6 @@ using std::string;
 #   define WRAP(n) std::to_string((n))
 #endif
 
-void reply(char *output, Response response)
-{
-    switch (response)
-    {
-    case Response::PARSING_OK:
-        output[0] = '0';
-        break;
-    
-    case Response::PARSING_ERR:
-        output[0] = '1';
-        break;
-    
-    case Response::DISPATCH_ERR:
-        output[0] = '2';
-        break;
-    
-    case Response::EXEC_FINISH:
-        output[0] = '3';
-        break;
-    }
-    output[1] = '\n';
-    output[2] = '\0';
-}
-
 static char getCmdKey(CommandType cmdType)
 {
     switch (cmdType)
@@ -65,15 +41,15 @@ void echo(char *output, const Command &cmd)
     switch (cmd.type)
     {
     case CommandType::SET_FLAP:
-        str += (int)cmd.flapStatus;
+        str += String(",") + WRAP((int)cmd.flapStatus);
         break;
 
     case CommandType::SET_FILTER:
-        str += (int)cmd.filterState;
+        str += String(",") + WRAP((int)cmd.filterState);
         break;
     
     case CommandType::WAIT:
-        str += cmd.waitTime;
+        str += String(",") + WRAP(cmd.waitTime);
         break;
     
     case CommandType::CALIBRATE:
@@ -100,4 +76,33 @@ void echo(char *output, const Command &cmd)
     str += '\n';
 
     strcpy(output, str.c_str());
+}
+
+void reply(char *output, const Response &response)
+{
+    switch (response.type)
+    {
+    case ResponseType::PARSING_OK:
+    case ResponseType::PARSING_ERR:
+    case ResponseType::DISPATCH_ERR:
+        snprintf(output, 64, "%d\n", (uint8_t)response.type);
+        break;
+    
+    case ResponseType::EXEC_FINISH:
+        output[0] = '0' + (uint8_t)response.type;
+        output[1] = ',';
+        echo(output + 2, response.lastCommand);
+        break;
+    
+    case ResponseType::DATA:
+        snprintf(output, 64, "%d,%d %d,%d %d,%d %d,%d %d,%d %d\n",
+            (uint8_t)response.type,
+            response.angles.opened[0], response.angles.closed[0],
+            response.angles.opened[1], response.angles.closed[1],
+            response.angles.opened[2], response.angles.closed[2],
+            response.angles.opened[3], response.angles.closed[3],
+            response.angles.opened[4], response.angles.closed[4]
+        );
+        break;
+    }
 }

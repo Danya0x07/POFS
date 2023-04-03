@@ -32,8 +32,10 @@ void Executor::stopExecuting()
     executing_ = false;
 }
 
-Executor::Event Executor::run(uint32_t ms)
+Executor::Event Executor::run(uint32_t ms, Response &response)
 {
+    bool haveDataToPrint = false;
+    
     if (!executing_)
         return NOTHING;
     
@@ -67,8 +69,9 @@ Executor::Event Executor::run(uint32_t ms)
         break;
     
     case CommandType::PRINT_CALIBRATION:
-        motorsPrintCalibration();
+        motorsGetCalibration(response);
         executing_ = false;
+        haveDataToPrint = true;
         break;
     
     case CommandType::EMERGENCY:
@@ -82,7 +85,12 @@ Executor::Event Executor::run(uint32_t ms)
         break;
     }
 
-    return executing_ ? NOTHING : FINISHED;
+    if (!executing_ && !haveDataToPrint) {
+        response.type = ResponseType::EXEC_FINISH;
+        response.lastCommand = getLastCommand();
+    }
+
+    return executing_ ? NOTHING : haveDataToPrint ? DATA : FINISHED;
 }
 
 const Command &Executor::getLastCommand()

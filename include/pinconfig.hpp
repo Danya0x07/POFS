@@ -1,6 +1,8 @@
 #ifndef _PIN_CONFIG_H
 #define _PIN_CONFIG_H
 
+#define NUM_MOTORS 5
+
 #ifdef ARDUINO
 #   define PIN_S0  D5
 #   define PIN_S1  D6

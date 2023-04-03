@@ -68,36 +68,50 @@ ParsingStatus parse(const char *input, Command &cmd)
 
     switch (cmd.type)
     {
-    case CommandType::SET_FLAP:
-        if (input[1] == '0')
-            cmd.flapStatus = FlapStatus::CLOSED;
-        else if (input[1] == '1')
+    case CommandType::SET_FLAP:        
+        if (!(marker = nextParameter(input, &tmp)))
+            return ParsingStatus::ERROR;
+        
+        if (tmp == 1)
             cmd.flapStatus = FlapStatus::OPENED;
+        else if (tmp == 0)
+            cmd.flapStatus = FlapStatus::CLOSED;
         else
             return ParsingStatus::ERROR;
-        if (input[2] != '\0')
+        
+        if (nextParameter(marker, &tmp))
             return ParsingStatus::ERROR;
+
         break;
     
     case CommandType::SET_FILTER:
-        switch (input[1])
+        if (!(marker = nextParameter(input, &tmp)))
+            return ParsingStatus::ERROR;
+        
+        switch (tmp)
         {
-        case '0': cmd.filterState = FilterState::FS0; break;
-        case '1': cmd.filterState = FilterState::FS1; break;
-        case '2': cmd.filterState = FilterState::FS2; break;
-        case '3': cmd.filterState = FilterState::FS3; break;
-        case '4': cmd.filterState = FilterState::FS4; break;
+        case 0: cmd.filterState = FilterState::FS0; break;
+        case 1: cmd.filterState = FilterState::FS1; break;
+        case 2: cmd.filterState = FilterState::FS2; break;
+        case 3: cmd.filterState = FilterState::FS3; break;
+        case 4: cmd.filterState = FilterState::FS4; break;
         default: return ParsingStatus::ERROR;
         }
-        if (input[2] != '\0')
+
+        if (nextParameter(marker, &tmp))
             return ParsingStatus::ERROR;
+        
         break;
 
     case CommandType::WAIT:
-        cmd.waitTime = atol(input + 1);
+        if (input[1] != ',' || input[2] == '\0')
+            return ParsingStatus::ERROR;
+
+        cmd.waitTime = atol(&input[2]);
         if (cmd.waitTime > 36000000L || 
             uint32_t(input[strlen(input) - 1] - '0') != cmd.waitTime % 10)
             return ParsingStatus::ERROR;
+        
         break;
 
     case CommandType::LOADING_MODE:
@@ -106,22 +120,20 @@ ParsingStatus parse(const char *input, Command &cmd)
         break;
 
     case CommandType::SAVE_PROGRAM:
-        marker = input + 1;
-        cmd.loop.beginMark = atoi(marker);
-        if (!(marker = nextParameter(marker, &tmp))) {
+        if (!(marker = nextParameter(input, &tmp)))
             return ParsingStatus::ERROR;
-        }
-        if (tmp < 0 || tmp > 100 || tmp < cmd.loop.beginMark) {
+        cmd.loop.beginMark = (uint16_t) tmp;
+
+        if (!(marker = nextParameter(marker, &tmp)))
             return ParsingStatus::ERROR;
-        }
+        if (tmp < 0 || tmp > 100 || tmp < cmd.loop.beginMark)
+            return ParsingStatus::ERROR;
         cmd.loop.endMark = (uint16_t) tmp;
 
-        if (!(marker = nextParameter(marker, &tmp))) {
+        if (!(marker = nextParameter(marker, &tmp)))
             return ParsingStatus::ERROR;
-        }
-        if (tmp < 0 || tmp > 10000) {
+        if (tmp < 0 || tmp > 10000)
             return ParsingStatus::ERROR;
-        }
         cmd.loop.numRepetitions = (uint16_t) tmp;
 
         if (nextParameter(marker, &tmp))
@@ -137,25 +149,23 @@ ParsingStatus parse(const char *input, Command &cmd)
         break;
     
     case CommandType::CALIBRATE:
-        marker = input + 1;
-        tmp = atoi(marker);
+        if (!(marker = nextParameter(input, &tmp)))
+            return ParsingStatus::ERROR;
         if (tmp > NUM_MOTORS)
             return ParsingStatus::ERROR;
         cmd.calibration.motorID = (MotorID)tmp;
 
-        if (!(marker = nextParameter(marker, &tmp))) {
+        if (!(marker = nextParameter(marker, &tmp)))
             return ParsingStatus::ERROR;
-        }
         if (tmp > 180)
             return ParsingStatus::ERROR;
-        cmd.calibration.openedAngle = (MotorID)tmp;
+        cmd.calibration.openedAngle = (uint8_t)tmp;
 
-        if (!(marker = nextParameter(marker, &tmp))) {
+        if (!(marker = nextParameter(marker, &tmp)))
             return ParsingStatus::ERROR;
-        }
         if (tmp > 180)
             return ParsingStatus::ERROR;
-        cmd.calibration.closedAngle = (MotorID)tmp;
+        cmd.calibration.closedAngle = (uint8_t)tmp;
 
         if (nextParameter(marker, &tmp))
             return ParsingStatus::ERROR;

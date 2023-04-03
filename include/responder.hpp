@@ -3,14 +3,25 @@
 
 #include "commands.hpp"
 
-enum class Response {
+enum class ResponseType: uint8_t {
     PARSING_OK,
     PARSING_ERR,
     DISPATCH_ERR,
-    EXEC_FINISH
+    EXEC_FINISH,
+    DATA
 };
 
-void reply(char *output, Response response);
-void echo(char *output, const Command &cmd);
+struct Response {
+    ResponseType type;
+    union {
+        Command lastCommand;
+        struct {
+            uint8_t opened[NUM_MOTORS];
+            uint8_t closed[NUM_MOTORS];
+        } angles;
+    };
+};
+
+void reply(char *output, const Response &response);
 
 #endif // _RESPONDER_HPP

@@ -74,21 +74,20 @@ void handleButton()
 void processInput()
 {
     Command command;
+    Response response;
     ParsingStatus status = parse(inputBuffer, command);
 
     if (status == ParsingStatus::OK) {
-        reply(outputBuffer, Response::PARSING_OK);
-        Serial.print(outputBuffer);
-        
+        response.type = ResponseType::PARSING_OK;
         CommandDispatcher::Status dispatchStatus = commandDispatcher.dispatch(command);
         if (dispatchStatus != CommandDispatcher::OK) {
-            reply(outputBuffer, Response::DISPATCH_ERR);
-            Serial.print(outputBuffer);
+            response.type = ResponseType::DISPATCH_ERR;
         }
     } else {
-        reply(outputBuffer, Response::PARSING_ERR);
-        Serial.print(outputBuffer);
+        response.type = ResponseType::PARSING_ERR;
     }
+    reply(outputBuffer, response);
+    Serial.print(outputBuffer);
 }
 
 void executeCommands()
@@ -101,13 +100,19 @@ void executeCommands()
         executor.startExecuting(command, millis());
     }
 
-    Executor::Event event = executor.run(millis());
-    if (event == Executor::FINISHED && !programRunner.commandsAvailable()) {
+    Response response;
+    Executor::Event event = executor.run(millis(), response);
+
+    if (event == Executor::DATA) {
         commandDispatcher.notifyExecutionFinished();
-        reply(outputBuffer, Response::EXEC_FINISH);
+        reply(outputBuffer, response);
         Serial.print(outputBuffer);
-        echo(outputBuffer, executor.getLastCommand());
-        Serial.print(outputBuffer);
+    } else if (event == Executor::FINISHED) {
+        if (!programRunner.commandsAvailable()) {
+            commandDispatcher.notifyExecutionFinished();
+            reply(outputBuffer, response);
+            Serial.print(outputBuffer);
+        }
     }
 }
 

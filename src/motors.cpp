@@ -1,18 +1,16 @@
 #include "motors.hpp"
 #include "pinconfig.hpp"
+#include "responder.hpp"
 
 #ifdef ARDUINO
 #include <Servo.h>
 #include <EEPROM.h>
-
-#define PRINT   Serial.print
 
 #else
 #include <stdio.h>
 #include <cstring>
 
 #define pinMode(pin, mode)
-#define PRINT   printf
 
 class Servo
 {
@@ -161,23 +159,16 @@ void motorCalibrate(CalibrationData calibration)
     haveUnsavedCalibration = true;
 }
 
-void motorsPrintCalibration()
+void motorsGetCalibration(Response &response)
 {
-    char buff[64];
-    snprintf(buff, sizeof(buff), "%d,%d;%d,%d;%d,%d;%d,%d;%d,%d;\n", 
-            openedAngles[MotorID::FLAP], closedAngles[MotorID::FLAP],
-            openedAngles[MotorID::F1], closedAngles[MotorID::F1],
-            openedAngles[MotorID::F2], closedAngles[MotorID::F2],
-            openedAngles[MotorID::F3], closedAngles[MotorID::F3],
-            openedAngles[MotorID::F4], closedAngles[MotorID::F4]
-    );
-    PRINT(buff);
+    response.type = ResponseType::DATA;
+    memcpy(response.angles.opened, openedAngles, sizeof(openedAngles));
+    memcpy(response.angles.closed, closedAngles, sizeof(closedAngles));
 }
 
 void flapSet(FlapStatus status)
 {
     motors[MotorID::FLAP].write(status == FlapStatus::OPENED ? openedAngles[MotorID::FLAP] : closedAngles[MotorID::FLAP]);
-
     flapStatus = status;
 }
 

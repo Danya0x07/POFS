@@ -11,42 +11,45 @@ void setUp()
 void Test_InitialState()
 {
     Executor executor(timer);
+    Response response;
 
     TEST_ASSERT_FALSE(executor.isExecuting());
-    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(0));
-    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(1000));
+    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(0, response));
+    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(1000, response));
 }
 
 void Test_FlapCommands()
 {
     Executor executor(timer);
+    Response response;
     Command command = {.type = CommandType::SET_FLAP};
 
     command.flapStatus = FlapStatus::OPENED;
     executor.startExecuting(command, 5);
     TEST_ASSERT_TRUE(executor.isExecuting());
-    TEST_ASSERT_EQUAL(Executor::FINISHED, executor.run(5));
+    TEST_ASSERT_EQUAL(Executor::FINISHED, executor.run(5, response));
     TEST_ASSERT_FALSE(executor.isExecuting());
-    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5));
+    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5, response));
 
     command.flapStatus = FlapStatus::CLOSED;
     executor.startExecuting(command, 5);
     TEST_ASSERT_TRUE(executor.isExecuting());
-    TEST_ASSERT_EQUAL(Executor::FINISHED, executor.run(5));
+    TEST_ASSERT_EQUAL(Executor::FINISHED, executor.run(5, response));
     TEST_ASSERT_FALSE(executor.isExecuting());
-    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5));
+    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5, response));
 
     command.flapStatus = FlapStatus::OPENED;
     executor.startExecuting(command, 5);
     executor.stopExecuting();
     TEST_ASSERT_FALSE(executor.isExecuting());
-    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5));
-    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(10));
+    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5, response));
+    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(10, response));
 }
 
 void Test_FilterCommands()
 {
     Executor executor(timer);
+    Response response;
     Command command = {.type = CommandType::SET_FLAP};
 
     const FilterState filterStates[] = {
@@ -61,42 +64,44 @@ void Test_FilterCommands()
         command.filterState = filterState;
         executor.startExecuting(command, 5);
         TEST_ASSERT_TRUE(executor.isExecuting());
-        TEST_ASSERT_EQUAL(Executor::FINISHED, executor.run(5));
+        TEST_ASSERT_EQUAL(Executor::FINISHED, executor.run(5, response));
         TEST_ASSERT_FALSE(executor.isExecuting());
-        TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5));
+        TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5, response));
 
         executor.startExecuting(command, 5);
         executor.stopExecuting();
         TEST_ASSERT_FALSE(executor.isExecuting());
-        TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5));
-        TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(10));
+        TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5, response));
+        TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(10, response));
     }
 }
 
 void Test_WaitCommand()
 {
     Executor executor(timer);
+    Response response;
     Command command = {.type = CommandType::WAIT, .waitTime = 1000};
 
     executor.startExecuting(command, 5);
     TEST_ASSERT_TRUE(executor.isExecuting());
-    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5));
-    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(500));
-    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(1000));
-    TEST_ASSERT_EQUAL(Executor::FINISHED, executor.run(1005));
+    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5, response));
+    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(500, response));
+    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(1000, response));
+    TEST_ASSERT_EQUAL(Executor::FINISHED, executor.run(1005, response));
     TEST_ASSERT_FALSE(executor.isExecuting());
 
     executor.startExecuting(command, 5);
     executor.stopExecuting();
     TEST_ASSERT_FALSE(executor.isExecuting());
-    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5));
-    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(1005));
-    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(1100));
+    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(5, response));
+    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(1005, response));
+    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(1100, response));
 }
 
 void Test_ResetCommand()
 {
     Executor executor(timer);
+    Response response;
     Command command = {.type = CommandType::WAIT, .waitTime = 100};
 
     executor.startExecuting(command, 5);
@@ -105,13 +110,14 @@ void Test_ResetCommand()
     command.type = CommandType::RESET;
     executor.startExecuting(command, 10);
     TEST_ASSERT_TRUE(executor.isExecuting());
-    TEST_ASSERT_EQUAL(Executor::FINISHED, executor.run(11));
+    TEST_ASSERT_EQUAL(Executor::FINISHED, executor.run(11, response));
     TEST_ASSERT_FALSE(executor.isExecuting());
 }
 
 void Test_NewCommandPreempts()
 {
     Executor executor(timer);
+    Response response;
     Command command = {.type = CommandType::SET_FLAP, .flapStatus = FlapStatus::OPENED};
 
     executor.startExecuting(command, 5);
@@ -121,8 +127,8 @@ void Test_NewCommandPreempts()
     command.waitTime = 100;
     executor.startExecuting(command, 5);
     TEST_ASSERT_TRUE(executor.isExecuting());
-    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(10));
-    TEST_ASSERT_EQUAL(Executor::FINISHED, executor.run(105));
+    TEST_ASSERT_EQUAL(Executor::NOTHING, executor.run(10, response));
+    TEST_ASSERT_EQUAL(Executor::FINISHED, executor.run(105, response));
 }
 
 int main()

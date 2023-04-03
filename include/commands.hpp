@@ -2,6 +2,7 @@
 #define _COMMANDS_H
 
 #include <stdint.h>
+#include "pinconfig.hpp"
 
 enum class CommandType: uint8_t {
     SET_FLAP,
@@ -26,9 +27,9 @@ enum class CommandType: uint8_t {
 #define CMDKEY_EXEC     'E'
 #define CMDKEY_CALIB    'C'
 #define CMDKEY_SAVE     'S'
-#define CMDKEY_PRINT    'c'
+#define CMDKEY_PRINT    'H'
 #define CMDKEY_RST      'R'
-#define CMDKEY_EMG      '!'
+#define CMDKEY_EMG      'Y'
 
 enum class FlapStatus: uint8_t {
     CLOSED, OPENED

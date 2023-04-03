@@ -5,18 +5,18 @@ void Test_IncorectCommands()
 {
     const char *rawStrings[] = {
         "Z",
-        "Z7",
+        "Z,7",
         "Z2,3",
         "A B",
-        "G2", "G-1",
-        "F7", "F-7",
+        "G,2", "G-1",
+        "F,7", "F,-7",
         "W 2000 ",
-        "L5", "L -6",
-        "P6,2,3", "P2,3", "P3", "P", "P2,6,3,4", "PZ",
+        "L,5", "L -6",
+        "P,6,2,3", "P2,3", "P3", "P,", "P2,6,3,4", "P,Z",
         "E5", "E -6",
-        "R5", "R -6",
-        "C2,3", "C3", "C", "C2,6,3,4", "CZ",
-        "S1", "S1 2"
+        "R,5", "R -6",
+        "C,2,3", "C3", "C", "C2,6,3,4", "CZ",
+        "S1", "S1, 2"
     };
     ParsingStatus status;
     Command cmd;
@@ -32,42 +32,42 @@ void Test_CorrectCommands()
     ParsingStatus status;
     Command cmd;
 
-    status = parse("G0", cmd);
+    status = parse("G,0", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::SET_FLAP, cmd.type);
     TEST_ASSERT_EQUAL(FlapStatus::CLOSED, cmd.flapStatus);
 
-    status = parse("G1", cmd);
+    status = parse("G,1", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::SET_FLAP, cmd.type);
     TEST_ASSERT_EQUAL(FlapStatus::OPENED, cmd.flapStatus);
 
-    status = parse("F0", cmd);
+    status = parse("F,0", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::SET_FILTER, cmd.type);
     TEST_ASSERT_EQUAL(FilterState::FS0, cmd.filterState);
 
-    status = parse("F1", cmd);
+    status = parse("F,1", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::SET_FILTER, cmd.type);
     TEST_ASSERT_EQUAL(FilterState::FS1, cmd.filterState);
 
-    status = parse("F2", cmd);
+    status = parse("F,2", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::SET_FILTER, cmd.type);
     TEST_ASSERT_EQUAL(FilterState::FS2, cmd.filterState);
 
-    status = parse("F3", cmd);
+    status = parse("F,3", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::SET_FILTER, cmd.type);
     TEST_ASSERT_EQUAL(FilterState::FS3, cmd.filterState);
 
-    status = parse("F4", cmd);
+    status = parse("F,4", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::SET_FILTER, cmd.type);
     TEST_ASSERT_EQUAL(FilterState::FS4, cmd.filterState);
 
-    status = parse("W120000", cmd);
+    status = parse("W,120000", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::WAIT, cmd.type);
     TEST_ASSERT_EQUAL(120000, cmd.waitTime);
@@ -76,7 +76,7 @@ void Test_CorrectCommands()
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::LOADING_MODE, cmd.type);
 
-    status = parse("P3,6,5", cmd);
+    status = parse("P,3,6,5", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::SAVE_PROGRAM, cmd.type);
     TEST_ASSERT_EQUAL(3, cmd.loop.beginMark);
@@ -87,7 +87,7 @@ void Test_CorrectCommands()
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::EXECUTE_PROGRAM, cmd.type);
 
-    status = parse("C3,20,170", cmd);
+    status = parse("C,3,20,170", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::CALIBRATE, cmd.type);
     TEST_ASSERT_EQUAL(MotorID::F3, cmd.calibration.motorID);
@@ -101,6 +101,14 @@ void Test_CorrectCommands()
     status = parse("R", cmd);
     TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
     TEST_ASSERT_EQUAL(CommandType::RESET, cmd.type);
+
+    status = parse("H", cmd);
+    TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
+    TEST_ASSERT_EQUAL(CommandType::PRINT_CALIBRATION, cmd.type);
+
+    status = parse("Y", cmd);
+    TEST_ASSERT_EQUAL(ParsingStatus::OK, status);
+    TEST_ASSERT_EQUAL(CommandType::EMERGENCY, cmd.type);
 }
 
 int main()

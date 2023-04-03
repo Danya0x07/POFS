@@ -2,14 +2,13 @@
 #define _MOTORS_HPP
 
 #include "commands.hpp"
-
-#define NUM_MOTORS 5
+#include "responder.hpp"
 
 void motorsSaveAngles();
 
 void motorsInit();
 void motorCalibrate(CalibrationData calibration);
-void motorsPrintCalibration();
+void motorsGetCalibration(Response &response);
 
 bool motorsHaveUnsavedCalibrationData();
 
