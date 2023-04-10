@@ -53,13 +53,13 @@ void echo(char *output, const Command &cmd)
         break;
     
     case CommandType::CALIBRATE:
-        str += String(WRAP(cmd.calibration.motorID))
+        str += String(",") + String(WRAP(cmd.calibration.motorID))
                 + String(",") + WRAP(cmd.calibration.openedAngle)
                 + String(",") + WRAP(cmd.calibration.closedAngle);
         break;
 
     case CommandType::SAVE_PROGRAM:
-        str += String(WRAP(cmd.loop.beginMark))
+        str += String(",") + String(WRAP(cmd.loop.beginMark))
                 + String(",") + WRAP(cmd.loop.endMark)
                 + String(",") + WRAP(cmd.loop.numRepetitions);
         break;
